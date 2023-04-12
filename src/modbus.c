@@ -18,7 +18,9 @@
 #include <unistd.h>
 #endif
 
+#if defined(_WIN32)
 #include <config.h>
+#endif
 
 #include "modbus-private.h"
 #include "modbus.h"
@@ -488,6 +490,16 @@ int _modbus_receive_msg(modbus_t *ctx, uint8_t *msg, msg_type_t msg_type)
                     step = _STEP_META;
                     break;
                 } /* else switches straight to the next step */
+                // TODO: Cleanup this code fails with a warning, of going straight to the next case instead of breaking
+                // The code is correct, but unsafe. This workaround is meant to fix the warning.
+                length_to_read = compute_data_length_after_meta(ctx, msg, msg_type);
+                if ((msg_length + length_to_read) > ctx->backend->max_adu_length) {
+                    errno = EMBBADDATA;
+                    _error_print(ctx, "too many data");
+                    return -1;
+                }
+                step = _STEP_DATA;
+                break;
             case _STEP_META:
                 length_to_read = compute_data_length_after_meta(ctx, msg, msg_type);
                 if ((msg_length + length_to_read) > ctx->backend->max_adu_length) {

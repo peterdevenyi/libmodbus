@@ -22,7 +22,9 @@
 #  include <arpa/inet.h>
 #endif
 
+#if defined(_WIN32)
 #include <config.h>
+#endif
 
 #include "modbus.h"
 

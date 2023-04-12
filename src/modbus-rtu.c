@@ -1240,7 +1240,9 @@ modbus_new_rtu(const char *device, int baud, char parity, int data_bit, int stop
     ctx_rtu = (modbus_rtu_t *) ctx->backend_data;
 
     /* Device name and \0 */
-    ctx_rtu->device = (char *) malloc((strlen(device) + 1) * sizeof(char));
+    // TODO: Investigate why: intermittently, this code causes undefined behaviour. Looks like + 1 is not always the right number
+    // as the string wont be copied over properly (tested on RPI linux). Adding + 2 solves the issue.
+    ctx_rtu->device = (char *) malloc((strlen(device) + 2));
     if (ctx_rtu->device == NULL) {
         modbus_free(ctx);
         errno = ENOMEM;
