@@ -23,7 +23,11 @@
 #endif
 
 #if HAVE_DECL_TIOCSRS485
+#if HAVE_DECL_NUTTX_PLATFORM
+#include <nuttx/serial/serial.h>
+#else
 #include <linux/serial.h>
+#endif
 #endif
 
 /* Table of CRC values for high-order byte */

@@ -251,7 +251,7 @@ static int _modbus_tcp_set_ipv4_options(int s)
 #endif
 #endif
 
-#ifndef OS_WIN32
+#if !defined(OS_WIN32) && !defined(HAVE_DECL_NUTTX_PLATFORM)
     /**
      * Cygwin defines IPTOS_LOWDELAY but can't handle that flag so it's
      * necessary to workaround that problem.
@@ -851,6 +851,18 @@ const modbus_backend_t _modbus_tcp_pi_backend = {
 };
 
 // clang-format on
+#if !defined(HAVE_DECL_NUTTX_PLATFORM)
+size_t strlcpy(char *dst, const char *src, size_t size) {
+    size_t ret = strlen(src);
+
+    if (size) {
+        size_t len = (ret >= size) ? size - 1 : ret;
+        memcpy(dst, src, len);
+        dst[len] = '\0';
+    }
+    return ret;
+}
+#endif
 
 modbus_t *modbus_new_tcp(const char *ip, int port)
 {
